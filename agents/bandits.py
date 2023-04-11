@@ -106,8 +106,8 @@ class GradientBandits(BaseAgent):
         self.avg_reward = None
 
     def reset(self, init_state):
-        super().reset(init_state)
         self.avg_reward = self.initializer.zero_initializer(self.num_states)
+        return super().reset(init_state)
 
     def step(self, state, reward):
         self.t += 1
