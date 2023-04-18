@@ -52,7 +52,7 @@ def greedy_policy(action_values: np.array, tie_break='first'):
         action_probs = action_probs/np.expand_dims(action_probs.sum(axis=axis), -1)
         return action_probs
 
-""" Greedy Policy """
+""" Epsilon-greedy Policy """
 
 def epsilon_greedy_policy(action_values: np.array, eps: float):
     """Computes an epsilon-greedy policy with respect to the action values
