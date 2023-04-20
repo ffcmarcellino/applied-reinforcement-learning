@@ -24,9 +24,6 @@ class Initializer:
         elif init_method == 'gaussian':
             return self.gaussian_initializer(self.dims, **kwargs)
 
-        elif init_method == 'uniform':
-            return self.uniform_initializer(self.dims, **kwargs)
-
         elif init_method == 'custom':
             return self.custom_initializer(kwargs['values'], self.dims)
 
@@ -71,30 +68,6 @@ class Initializer:
             A numpy array with initial values sampled according to a normal distribution N(mean, std)
         """
         return np.random.randn(*dims)*std + mean
-
-    @classmethod
-    def uniform_initializer(self, dims, low, high, one_hot=False):
-        """Initializes a numpy array according to the uniform distribution in the range [low, high)
-
-        Args:
-            n-tuple 'dims': tuple of numpy array dimensions
-            int 'low': lower bound of the distribution range, inclusive
-            int 'high': upper bound of the distribution range, exclusive
-            bool 'one_hot': whether the output is one-hot encoded or not
-
-        Returns:
-            A numpy array with initial values sampled according to a uniform distribution U(low, high) and one-hot encoded depending on the
-            'one_hot' input argument
-        """
-        init_values = np.random.randint(low, high, dims)
-
-        if one_hot:
-            one_hot_cols = init_values.flatten()
-            init_values = np.zeros((len(one_hot_cols), high-low)).astype(int)
-            init_values[np.arange(len(one_hot_cols)), one_hot_cols] = 1
-            return init_values.reshape((*dims, -1))
-
-        return init_values
 
     @classmethod
     def custom_initializer(self, A, dims):
