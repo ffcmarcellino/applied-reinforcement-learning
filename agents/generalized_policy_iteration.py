@@ -4,7 +4,7 @@ from .action_selection import greedy_policy
 
 class PolicyIteration:
 
-    def __init__(self, num_states, num_actions, initializer_params, terminal_states, theta, reward_dynamics, next_state_dynamics, discount_factor):
+    def __init__(self, num_states, num_actions, initializer_params, terminal_states, theta, reward_dynamics, next_state_dynamics, discount_factor=1):
         self.num_states = num_states
         self.num_actions = num_actions
         self.state_values = None
