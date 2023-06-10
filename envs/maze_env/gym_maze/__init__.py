@@ -47,8 +47,14 @@ register(
 )
 
 register(
-    id='maze-sample-30x30-v0',
-    entry_point='gym_maze.envs:MazeEnvSample30x30',
+    id='maze-sample-25x25-v0',
+    entry_point='gym_maze.envs:MazeEnvSample25x25',
+    max_episode_steps=1000000,
+)
+
+register(
+    id='maze-sample-50x50-v0',
+    entry_point='gym_maze.envs:MazeEnvSample50x50',
     max_episode_steps=1000000,
 )
 

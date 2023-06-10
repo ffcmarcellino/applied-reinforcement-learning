@@ -85,16 +85,14 @@ class MazeEnv(gym.Env):
 
         self.state = self.maze_view.robot
 
-        info = {}
-
-        return self.state, reward, done, None, info
+        return self.state, reward, done, None, {}
 
     def reset(self):
         self.maze_view.reset_robot()
         self.state = np.zeros(2)
         self.steps_beyond_done = None
         self.done = False
-        return self.state
+        return self.state, {}
 
     def is_game_over(self):
         return self.maze_view.game_over
@@ -172,10 +170,20 @@ class MazeEnvRandom3x3(MazeEnv):
     def __init__(self, enable_render=False):
         super(MazeEnvRandom3x3, self).__init__(maze_size=(3, 3), enable_render=enable_render)
 
+class MazeEnvSample25x25(MazeEnv):
+
+    def __init__(self, enable_render=False):
+        super(MazeEnvSample25x25, self).__init__(maze_file="maze2d_25x25.npy", enable_render=enable_render)
+
 class MazeEnvSample30x30(MazeEnv):
 
     def __init__(self, enable_render=False):
         super(MazeEnvSample30x30, self).__init__(maze_file="maze2d_30x30.npy", enable_render=enable_render)
+
+class MazeEnvSample50x50(MazeEnv):
+
+    def __init__(self, enable_render=False):
+        super(MazeEnvSample50x50, self).__init__(maze_file="maze2d_50x50.npy", enable_render=enable_render)
 
 class MazeEnvSample100x100(MazeEnv):
 

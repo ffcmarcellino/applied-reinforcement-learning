@@ -28,24 +28,27 @@ class ContextualTrafficTimeEnv:
     P_RAIN = 0.2
 
     def reset(self):
+
         if np.random.uniform() > self.P_RAIN:
-            return 0, None
-        return 1, None
+            self.context = 0
+        self.context = 1
 
-    def step(self, context, route):
+        return self.context, None
 
-        if context == 0:
+    def step(self, route):
+
+        if self.context == 0:
             time = np.random.normal(self.AVGS_NO_RAIN[route], self.STDEVS_NO_RAIN[route])
-        elif context == 1:
+        elif self.context == 1:
             time = np.random.normal(self.AVGS_RAIN[route], self.STDEVS_RAIN[route])
         else:
             raise ValueError(f"The context must be either 0 or 1.")
 
-        next_context = 0
+        self.context = 0
         if np.random.uniform() < self.P_RAIN:
-            next_context = 1
+            self.context = 1
 
-        return next_context, time, False, None
+        return self.context , time, False, None, {}
 
 class TrafficTimeEnv(ContextualTrafficTimeEnv):
     """
@@ -55,12 +58,11 @@ class TrafficTimeEnv(ContextualTrafficTimeEnv):
     def reset(self):
         return 0, None
 
-    def step(self, context, route):
+    def step(self, route):
 
-        assert context == 0, "Context can only take value 0"
         if np.random.uniform() < self.P_RAIN:
             time = np.random.normal(self.AVGS_RAIN[route], self.STDEVS_RAIN[route])
         else:
             time = np.random.normal(self.AVGS_NO_RAIN[route], self.STDEVS_NO_RAIN[route])
 
-        return 0, time, False, None
+        return 0, time, False, None, {}

@@ -97,7 +97,11 @@ def test_policy_evaluation():
     [0, 0, 0, 1],
     [0, 0, 0, 1]
     ])
-    polit.policy_evaluation(max_iterations=1)
+    metrics_info = {'rmse': {'target_state_values': np.ones(len(polit.state_values))},
+                    'max_abs_err': {'target_state_values': np.ones(len(polit.state_values))},
+                    'num_iterations': None
+                    }
+    polit.policy_evaluation(max_iterations=1, metrics_info=metrics_info)
     assert (polit.state_values.astype(int) == ans).all()
 
     ans = np.array([-8, -5, -2, -5, -8, -14, -8, 0, -8, -14, -13, -10, 0, -10, -13, -11, -11, 0, -11, -11, -8, -5, -2, -5, -8])
@@ -110,10 +114,24 @@ def test_run():
 
     polit = PolicyIteration(*get_params())
     polit.reset()
-    polit.run(max_iterations=100, max_eval_iterations=100)
+    metrics_info = {'rmse': {'target_state_values': ans},
+                    'max_abs_err': {'target_state_values': ans},
+                    'num_iterations': None
+                    }
+
+
+    metrics = polit.run(max_iterations=100, max_eval_iterations=100, metrics_info=metrics_info)
     assert (polit.state_values.astype(int) == ans).all()
+    assert metrics['rmse'][-1] <= polit.theta
+    assert metrics['max_abs_err'][-1] <= polit.theta
+    assert len(metrics['num_iterations']) <= 100
+    assert (np.array(metrics['num_iterations']) <= 100).all()
 
     valit = ValueIteration(*get_params())
     valit.reset()
-    valit.run(max_iterations=100)
+    metrics = valit.run(max_iterations=100, metrics_info=metrics_info)
     assert (valit.state_values.astype(int) == ans).all()
+    assert metrics['rmse'][-1] <= valit.theta
+    assert metrics['max_abs_err'][-1] <= valit.theta
+    assert len(metrics['num_iterations']) <= 100
+    assert (np.array(metrics['num_iterations']) == 1).all()

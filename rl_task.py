@@ -1,5 +1,6 @@
 import numpy as np
 from tqdm import tqdm
+import time
 
 class MDP:
 
@@ -13,7 +14,7 @@ class MDP:
         return init_state, init_action, False
 
     def step(self, state, action):
-        next_state, reward, is_terminal, _ = self.env.step(state, action)
+        next_state, reward, is_terminal, _,_ = self.env.step(action)
         next_action = self.agent.step(next_state, reward)
         return reward, next_state, next_action, is_terminal
 
@@ -23,29 +24,41 @@ class RLTask(MDP):
         super().__init__(agent, env)
         self.max_episode_lenght = max_episode_lenght
 
-    def run_episode(self):
+    def run_episode(self, metrics_info=None, render_lag=None):
+
+        metrics = {metric: [] for metric in metrics_info} if metrics_info is not None else {}
         state, action, is_terminal = self.reset()
+        if render_lag is not None:
+            self.env.render()
         for i in range(self.max_episode_lenght):
-            state, action, is_terminal = self.step(state, action)
+            reward, state, action, is_terminal = self.step(state, action)
+            if render_lag is not None:
+                time.sleep(render_lag)
+                self.env.render()
+            if 'cum_reward' in metrics:
+                self._update_cum_reward(metrics, reward)
             if is_terminal:
                 break
+        if 'num_steps' in metrics:
+            metrics['num_steps'] = self.agent.t
+        return metrics
 
-    def run_mdp(self, num_iterations, metrics_info=None):
+    def run_mdp(self, num_iterations, metrics_info=None, render_lag=None):
 
-        metrics = {metric: [] for metric in metrics_info}
+        metrics = {metric: [] for metric in metrics_info} if metrics_info is not None else {}
         state, action, _ = self.reset()
 
         for i in range(num_iterations):
 
-            if 'optimal_action_flag' in metrics_info:
+            if 'optimal_action_flag' in metrics:
                 self._update_optimal_action_flag(metrics['optimal_action_flag'], action, metrics_info['optimal_action_flag']['optimal_action'])
 
             reward, state, action, _ = self.step(state, action)
 
-            if 'cum_avg_reward' in metrics_info:
+            if 'cum_avg_reward' in metrics:
                 self._update_cum_avg_reward(metrics['cum_avg_reward'], reward)
 
-        if 'final_policy' in metrics_info:
+        if 'final_policy' in metrics:
             self._update_final_policy(metrics, metrics_info['final_policy']['states'])
 
         return metrics
@@ -85,3 +98,7 @@ class RLTask(MDP):
 
     def _update_final_policy(self, metrics, states):
         metrics['final_policy'] = self.agent.get_policy(states)
+
+    def _update_cum_reward(self, metrics, reward):
+        metrics['cum_reward'].append(reward)
+        metrics['cum_reward'] = [sum(metrics['cum_reward'])]
