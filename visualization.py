@@ -16,7 +16,7 @@ def _get_scatter_obj(x, y, name=None, color=None):
         color = COLORS[color]
     return go.Scatter(x=x, y=y, name=name, line={'color': color})
 
-def plot_figure(data, **kwargs):
+def plot_figure(data, test=False, **kwargs):
 
     data = [_get_scatter_obj(**data_i) for data_i in data]
 
@@ -37,4 +37,5 @@ def plot_figure(data, **kwargs):
     if kwargs.get('fig_path', None) is not None:
         fig.write_image(f"{kwargs['fig_path']}.png")
 
-    fig.show()
+    if not test:
+        fig.show()

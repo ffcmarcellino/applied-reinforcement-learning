@@ -55,7 +55,7 @@ def test_traffic_time_bandits_notebook():
     'color': 0
     }
 
-    plot_cum_avg_reward([optimal_avg_reward, cum_avg_reward_1], title)
+    plot_figure([optimal_avg_reward, cum_avg_reward_1], title=title, xtitle=title, ytitle=title, test=True)
 
     perc_opt_actions_1 ={
     'x': num_steps,
@@ -64,7 +64,7 @@ def test_traffic_time_bandits_notebook():
     'color': 11
     }
 
-    plot_perc_opt_actions(data=[perc_opt_actions_1], title=title)
+    plot_figure([perc_opt_actions_1], title=title, xtitle=title, ytitle=title, test=True)
 
     epsilon_greedy_agent_info = {
     'initializer_params': {'init_method': 'constant', 'constant': -26},
