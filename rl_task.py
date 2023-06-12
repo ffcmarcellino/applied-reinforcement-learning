@@ -20,9 +20,9 @@ class MDP:
 
 class RLTask(MDP):
 
-    def __init__(self, agent, env, max_episode_lenght=10e6):
+    def __init__(self, agent, env, max_episode_length=10**6):
         super().__init__(agent, env)
-        self.max_episode_lenght = max_episode_lenght
+        self.max_episode_length = max_episode_length
 
     def run_episode(self, metrics_info=None, render_lag=None):
 
@@ -30,7 +30,7 @@ class RLTask(MDP):
         state, action, is_terminal = self.reset()
         if render_lag is not None:
             self.env.render()
-        for i in range(self.max_episode_lenght):
+        for i in range(self.max_episode_length):
             reward, state, action, is_terminal = self.step(state, action)
             if render_lag is not None:
                 time.sleep(render_lag)
@@ -46,7 +46,7 @@ class RLTask(MDP):
     def run_mdp(self, num_iterations, metrics_info=None, render_lag=None):
 
         metrics = {metric: [] for metric in metrics_info} if metrics_info is not None else {}
-        state, action, _ = self.reset()
+        state, action, done = self.reset()
 
         for i in range(num_iterations):
 
