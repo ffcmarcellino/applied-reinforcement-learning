@@ -2,3 +2,7 @@ numpy
 pandas
 plotly
 kaleido
+pygame
+gym
+gymnasium
+gym_recorder

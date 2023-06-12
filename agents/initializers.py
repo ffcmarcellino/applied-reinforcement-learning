@@ -71,5 +71,14 @@ class Initializer:
 
     @classmethod
     def custom_initializer(self, A, dims):
+        """Initializes a numpy array with custom values given by array A
+
+        Args:
+            numpy.array 'A': array with the custom initial values
+            n-tuple 'dims': tuple of numpy array dimensions
+
+        Returns:
+            A numpy array with initial values copied from A
+        """
         assert np.equal(A.shape, dims).all()
         return A.copy()
