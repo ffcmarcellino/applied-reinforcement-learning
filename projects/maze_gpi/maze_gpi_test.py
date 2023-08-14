@@ -2,7 +2,6 @@ import numpy as np
 import time
 import gym
 import gym_maze
-from gym_recorder import Recorder
 from tqdm import tqdm
 
 from rl_task import RLTask
@@ -25,6 +24,9 @@ class GPIAgent:
         action = policy_action_selection(self.policy[self.obs_to_state(next_obs)])
         self.t += 1
         return int(action)
+
+    def on_episode_end(self):
+        return
 
 env = gym.make("maze-sample-10x10-v0", enable_render=False)
 num_states = np.product(env.maze_size)
