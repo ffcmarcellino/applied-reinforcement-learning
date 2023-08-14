@@ -1,8 +1,9 @@
 numpy
 pandas
 plotly
+tqdm
 kaleido
 pygame
 gym
 gymnasium
-gym_recorder
+gym_record
