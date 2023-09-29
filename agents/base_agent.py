@@ -33,8 +33,8 @@ class BaseAgent:
     def on_episode_end(self):
         return
 
-    def select_action(self, state):
-        policy = self.get_policy(state)
+    def select_action(self, state, greedy=False):
+        policy = self.get_policy(state) if not greedy else self.get_greedy_policy(states, tie_break='random')
         if isinstance(policy, np.int64):
             return policy
         else:
