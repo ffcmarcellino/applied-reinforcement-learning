@@ -11,7 +11,8 @@ def test_select_action():
     # test greedy action selection
     agent_info['action_selection_params'] = {'method': 'greedy'}
     agent = BaseAgent(1, 5, agent_info)
-    agent.reset(0)
+    agent.reset()
+    agent.start(0)
 
     action_count = np.zeros(5)
     for i in range(10):
@@ -23,7 +24,8 @@ def test_select_action():
     agent_info['action_selection_params'] = {'method': 'epsilon_greedy'}
     agent_info['action_selection_params']['kwargs'] = {'eps': 0.2}
     agent = BaseAgent(1, 5, agent_info)
-    agent.reset(0)
+    agent.reset()
+    agent.start(0)
     action_count = np.zeros(5)
     for i in range(200):
         action = agent.select_action(0)
@@ -35,7 +37,8 @@ def test_select_action():
     agent_info['action_selection_params'] = {'method': 'ucb'}
     agent_info['action_selection_params']['kwargs'] = {'c': 10}
     agent = BaseAgent(1, 5, agent_info)
-    agent.reset(0)
+    agent.reset()
+    agent.start(0)
     agent.num_visits = np.array([[1, 10, 0, 3, 9]])
     action_count = np.zeros(5)
     for i in range(10):
@@ -47,7 +50,8 @@ def test_select_action():
     agent_info['initializer_params'] = {'init_method': 'custom', 'values': np.array([[1, 3, 2]])}
     agent_info['action_selection_params'] = {'method': 'softmax'}
     agent = BaseAgent(1, 3, agent_info)
-    agent.reset(0)
+    agent.reset()
+    agent.start(0)
     action_count = np.zeros(3)
     for i in range(200):
         action = agent.select_action(0)
@@ -65,7 +69,8 @@ def test_k_bandits():
 
     agent = KBandits(3, 5, agent_info)
 
-    agent.reset(0)
+    agent.reset()
+    agent.start(0)
 
     agent.step(1, -10)
     assert agent.num_visits[0, 0] == 1
@@ -100,7 +105,8 @@ def test_gradient_bandits():
 
     agent = GradientBandits(3, 5, agent_info)
 
-    agent.reset(0)
+    agent.reset()
+    agent.start(0)
 
     action = agent.last_action
     agent.step(1, -10)

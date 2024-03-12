@@ -8,3 +8,4 @@ gym
 gymnasium
 gym_record
 minigrid
+imageio

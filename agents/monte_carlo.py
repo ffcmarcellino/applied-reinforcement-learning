@@ -11,13 +11,14 @@ class MonteCarloAgent(BaseAgent):
         self.trajectory = None
         self._learn_from_trajectory = self._get_learning_fun()
 
-    def reset(self, init_state, hard_reset=False):
-        if hard_reset or self.num_visits is None or self.action_values is None:
-            self.t = 1
-            self.num_visits = self.initializer.initialize("zero")
-            if self.learning_params.get('average_type', None) == 'weighted':
-                self.weight_sum = self.initializer.initialize("zero")
-            self.action_values = self.initializer.initialize(**self.initializer_params)
+    def reset(self):
+        self.t = 1
+        self.num_visits = self.initializer.initialize("zero")
+        if self.learning_params.get('average_type', None) == 'weighted':
+            self.weight_sum = self.initializer.initialize("zero")
+        self.action_values = self.initializer.initialize(**self.initializer_params)
+        
+    def start(self, init_state):
         self.last_state = init_state
         if self.exploring_starts:
             self.last_action = np.random.randint(self.num_actions) if self.allowed_actions_mask is None else np.random.choice(np.nonzero(self.allowed_actions_mask[init_state])[0])
@@ -25,7 +26,7 @@ class MonteCarloAgent(BaseAgent):
             self.last_action = self.select_action(init_state)
         self.trajectory = [(None, init_state, self.last_action)]
         return self.last_action
-
+    
     def step(self, state, reward):
         self.last_state = state
         self.last_action = self.select_action(state)

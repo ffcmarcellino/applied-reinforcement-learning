@@ -19,10 +19,12 @@ class BaseAgent:
         self.last_state = None
         self.last_action = None
 
-    def reset(self, init_state):
+    def reset(self):
         self.t = 0
         self.num_visits = self.initializer.initialize("zero")
         self.action_values = self.initializer.initialize(**self.initializer_params)
+    
+    def start(self, init_state):
         self.last_state = init_state
         self.last_action = self.select_action(init_state)
         return self.last_action
@@ -34,7 +36,7 @@ class BaseAgent:
         return
 
     def select_action(self, state, greedy=False):
-        policy = self.get_policy(state) if not greedy else self.get_greedy_policy(states, tie_break='random')
+        policy = self.get_policy(state) if not greedy else self.get_greedy_policy(state, tie_break='random')
         if isinstance(policy, np.int64):
             return policy
         else:

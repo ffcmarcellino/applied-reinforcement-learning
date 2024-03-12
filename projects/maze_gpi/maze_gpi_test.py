@@ -7,6 +7,7 @@ from tqdm import tqdm
 from rl_task import RLTask
 from agents.generalized_policy_iteration import PolicyIteration, ValueIteration
 from agents.action_selection import policy_action_selection
+from metrics import NumStepsMetric
 from visualization import plot_figure
 
 class GPIAgent:
@@ -14,10 +15,12 @@ class GPIAgent:
     def __init__(self, policy, obs_to_state_fun):
         self.policy = policy
         self.obs_to_state = obs_to_state_fun
-
-    def reset(self, init_obs):
-        action = policy_action_selection(self.policy[self.obs_to_state(init_obs)])
+        
+    def reset(self):
         self.t = 0
+
+    def start(self, init_obs):
+        action = policy_action_selection(self.policy[self.obs_to_state(init_obs)])
         return int(action)
 
     def step(self, next_obs, reward):
@@ -39,6 +42,7 @@ metrics_info = {'num_iterations': None,
                 'rmse': {'target_state_values': np.zeros(num_states)},
                 'max_abs_err': {'target_state_values': np.zeros(num_states)}
                 }
+metric_objs = [NumStepsMetric('on_episode_end')]
 title = ""
 
 def test_plots():
@@ -82,7 +86,8 @@ def test_run_polit():
 
     polit_10_agent = GPIAgent(polit_10.policy, env.obs_to_state)
     rl_task = RLTask(polit_10_agent, env, num_states)
-    metrics = rl_task.run_episode(metrics_info=['num_steps'])
+    rl_task.agent.reset()
+    metrics = rl_task.run_episode(metric_objs=metric_objs)
     metrics['num_steps']
 
     polit_10.reset()
@@ -105,5 +110,6 @@ def test_run_valit():
 
     valit_10_agent = GPIAgent(valit_10.policy, env.obs_to_state)
     rl_task = RLTask(valit_10_agent, env, num_states)
-    metrics = rl_task.run_episode(metrics_info=['num_steps'])
+    rl_task.agent.reset()
+    metrics = rl_task.run_episode(metric_objs=metric_objs)
     metrics['num_steps']

@@ -81,4 +81,4 @@ class Initializer:
             A numpy array with initial values copied from A
         """
         assert np.equal(A.shape, dims).all()
-        return A.copy()
+        return A.astype(float)

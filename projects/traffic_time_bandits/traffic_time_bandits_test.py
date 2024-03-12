@@ -4,6 +4,7 @@ import numpy as np
 from envs.traffic_time_env import TrafficTimeEnv, ContextualTrafficTimeEnv
 from agents.bandits import KBandits, GradientBandits
 from rl_task import RLTask
+from metrics import OptimalActionFlagMetric, GreedyPolicyMetric, CumAvgRewardMetric
 from visualization import *
 
 def test_traffic_time_bandits_notebook():
@@ -14,11 +15,9 @@ def test_traffic_time_bandits_notebook():
     num_runs = 2
     num_steps = 2
 
-    metrics_info = {
-        'optimal_action_flag': {'optimal_action': 2},
-        'final_policy': {'states': 0},
-        'cum_avg_reward': None
-    }
+    metric_objs = [OptimalActionFlagMetric(optimal_action=5, location='on_iteration_start'), 
+               GreedyPolicyMetric(states=0, location='on_run_end'), 
+               CumAvgRewardMetric('on_iteration_end')]
 
     env.AVGS_RAIN
     env.P_RAIN
@@ -44,9 +43,10 @@ def test_traffic_time_bandits_notebook():
 
     greedy_agent = KBandits(1, num_actions, greedy_agent_info)
     task = RLTask(greedy_agent, env)
-    metrics = task.run_independent_mdps(num_runs, num_steps, metrics_info)
+    task.agent.reset()
+    metrics = task.run_independent_mdps(num_runs, num_steps, metric_objs)
 
-    metrics['final_policy']
+    metrics['greedy_policy']
 
     cum_avg_reward_1 ={
     'x': num_steps,
@@ -77,7 +77,8 @@ def test_traffic_time_bandits_notebook():
 
     epsilon_greedy_agent = KBandits(1, num_actions, epsilon_greedy_agent_info)
     task = RLTask(epsilon_greedy_agent, env)
-    metrics = task.run_independent_mdps(num_runs, num_steps, metrics_info)
+    task.agent.reset()
+    metrics = task.run_independent_mdps(num_runs, num_steps, metric_objs)
 
     ucb_agent_info = {
     'initializer_params': {'init_method': 'constant', 'constant': -26},
@@ -90,7 +91,8 @@ def test_traffic_time_bandits_notebook():
 
     ucb_agent = KBandits(1, num_actions, ucb_agent_info)
     task = RLTask(ucb_agent, env)
-    metrics = task.run_independent_mdps(num_runs, num_steps, metrics_info)
+    task.agent.reset()
+    metrics = task.run_independent_mdps(num_runs, num_steps, metric_objs)
 
     gradient_agent_info = {
     'initializer_params': {'init_method': 'zero'},
@@ -99,7 +101,8 @@ def test_traffic_time_bandits_notebook():
 
     gradient_agent = GradientBandits(1, num_actions, gradient_agent_info)
     task = RLTask(gradient_agent, env)
-    metrics = task.run_independent_mdps(num_runs, num_steps, metrics_info)
+    task.agent.reset()
+    metrics = task.run_independent_mdps(num_runs, num_steps, metric_objs)
 
     env = ContextualTrafficTimeEnv()
 
@@ -119,4 +122,5 @@ def test_traffic_time_bandits_notebook():
 
     ucb_agent = KBandits(2, num_actions, ucb_agent_info)
     task = RLTask(ucb_agent, env)
-    metrics = task.run_independent_mdps(num_runs, num_steps, metrics_info)
+    task.agent.reset()
+    metrics = task.run_independent_mdps(num_runs, num_steps, metric_objs)
