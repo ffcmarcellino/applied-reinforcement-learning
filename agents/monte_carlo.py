@@ -7,17 +7,15 @@ class MonteCarloAgent(BaseAgent):
         super().__init__(num_states, num_actions, agent_info)
         self.exploring_starts = agent_info.get('exploring_starts', False)
         self.learning_params = agent_info.get('learning_params', {'method': 'on_policy'})
-        self.state_action_to_after_state_map = agent_info.get('state_action_to_after_state_map', None)
         self.trajectory = None
         self._learn_from_trajectory = self._get_learning_fun()
 
     def reset(self):
+        super().reset()
         self.t = 1
-        self.num_visits = self.initializer.initialize("zero")
         if self.learning_params.get('average_type', None) == 'weighted':
             self.weight_sum = self.initializer.initialize("zero")
-        self.action_values = self.initializer.initialize(**self.initializer_params)
-        
+         
     def start(self, init_state):
         self.last_state = init_state
         if self.exploring_starts:
@@ -86,8 +84,7 @@ class MonteCarloAgent(BaseAgent):
             s, a = self.trajectory[t][1:]
             G = G*self.discount + r
             if t == first_visits[s][a]:
-                self.num_visits[s][a] += 1
-                self.action_values[s][a] += self._step_size(s, a)*(G - self.action_values[s][a])
+                self.update_action_value(s,a,G)
         self.t += 1
 
     def _on_policy_learning_after_state(self):
@@ -105,11 +102,7 @@ class MonteCarloAgent(BaseAgent):
             after_state = self.state_action_to_after_state_map[s,a]
             G = G*self.discount + r
             if t == first_visits[after_state]:
-                self.num_visits[s][a] += 1
-                self.action_values[s][a] += self._step_size(s, a)*(G - self.action_values[s][a])
-                all_s, all_a = np.nonzero(self.state_action_to_after_state_map == after_state)
-                self.num_visits[all_s, all_a] = self.num_visits[s][a]
-                self.action_values[all_s, all_a] = self.action_values[s][a]
+                self.update_action_value(s,a,G)
         self.t += 1
 
     def _ordinary_importance_sampling(self):
@@ -124,7 +117,7 @@ class MonteCarloAgent(BaseAgent):
             self.action_values[s][a] += self._inverse_count(s,a)*(W*G - self.action_values[s][a])
             if self.get_greedy_policy(s) != a:
                 break
-            W /= self.get_policy(s)[a]
+            W /= self.behavior_policy(s)[a]
         self.t += 1
 
     def _weighted_importance_sampling(self):
@@ -140,7 +133,7 @@ class MonteCarloAgent(BaseAgent):
             self.action_values[s][a] += W*(G - self.action_values[s][a])/self.weight_sum[s][a]
             if self.get_greedy_policy(s) != a:
                 break
-            W /= self.get_policy(s)[a]
+            W /= self.behavior_policy(s)[a]
         self.t += 1
 
     def _discounting_aware_ordinary_importance_sampling(self):
@@ -157,7 +150,7 @@ class MonteCarloAgent(BaseAgent):
             self.num_visits[s][a] += 1
             self.action_values[s][a] += self._inverse_count(s,a)*(weighted_G - self.action_values[s][a])
             term_degrees = np.r_[self.discount * term_degrees, 1-self.discount]
-            cum_importances = np.r_[cum_importances * (self.get_greedy_policy(s) == a) / self.get_policy(s)[a], 1]
+            cum_importances = np.r_[cum_importances * (self.get_greedy_policy(s) == a) / self.behavior_policy(s)[a], 1]
         self.t += 1
 
     def _discounting_aware_weighted_importance_sampling(self):
@@ -176,7 +169,7 @@ class MonteCarloAgent(BaseAgent):
             self.num_visits[s][a] += 1
             self.action_values[s][a] += weights.sum()*(weighted_G/weights.sum() - self.action_values[s][a]) / self.weight_sum[s][a]
             term_degrees = np.r_[self.discount * term_degrees, 1-self.discount]
-            cum_importances = np.r_[cum_importances * (self.get_greedy_policy(s) == a) / self.get_policy(s)[a], 1]
+            cum_importances = np.r_[cum_importances * (self.get_greedy_policy(s) == a) / self.behavior_policy(s)[a], 1]
         self.t += 1
 
     def _per_decision_importance_sampling(self):
@@ -189,6 +182,6 @@ class MonteCarloAgent(BaseAgent):
             weighted_G = weighted_G*self.discount*W + r 
             self.num_visits[s][a] += 1
             self.action_values[s][a] += self._inverse_count(s,a)*(weighted_G - self.action_values[s][a])
-            W = (self.get_greedy_policy(s) == a)/self.get_policy(s)[a]
+            W = (self.get_greedy_policy(s) == a)/self.behavior_policy(s)[a]
         self.t += 1
 

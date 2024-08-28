@@ -58,7 +58,7 @@ class GreedyPolicyMetric(BaseMetric):
         self.states = states
         
     def update(self, metrics, **kwargs):
-        metrics[self.NAME] = kwargs['agent'].get_policy(self.states)
+        metrics[self.NAME] = kwargs['agent'].target_policy(self.states)
         
 class ReturnMetric(BaseMetric):
     """Return of the agent"""
@@ -77,6 +77,20 @@ class RewardMetric(BaseMetric):
     def update(self, metrics, **kwargs):
         metrics[self.NAME].append(kwargs['reward'])
         
+class RewardCountMetric(BaseMetric):
+    """Count of each possible reward value obtained by the agent."""
+    
+    NAME = 'reward_count'
+    
+    def update(self, metrics, **kwargs):
+        r = kwargs['reward']
+        if len(metrics[self.NAME]) == 0:
+            metrics[self.NAME] = {}
+        if r not in metrics[self.NAME]:
+            metrics[self.NAME][r] = 1
+        else:
+            metrics[self.NAME][r] += 1
+
 class ActionValuesMetric(BaseMetric):
     """Action-values computed by the agent"""
     

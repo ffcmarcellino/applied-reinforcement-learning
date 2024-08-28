@@ -34,13 +34,16 @@ class RLTask(MDP):
 
         for i in range(self.max_episode_length):
             reward, state, action, is_terminal, is_truncated, info = self.step(state, action)
-            self._compute_metrics(metrics, metric_objs, 'on_episode_step', state=state, action=action, reward=reward, agent=self.agent, info=info)
+            self._compute_metrics(metrics, metric_objs, 'on_episode_step', state=state, action=action, reward=reward, agent=self.agent, step=i+1, info=info)
             if render_lag is not None:
                 time.sleep(render_lag)
                 self.env.render()
             if is_terminal or is_truncated:
                 self.agent.on_episode_end()
                 break
+
+        if (not is_truncated) and (not is_terminal):
+            self.agent.on_episode_end()
         
         self._compute_metrics(metrics, metric_objs, 'on_episode_end', reward=reward, agent=self.agent, step=i+1)
 
@@ -68,7 +71,7 @@ class RLTask(MDP):
                 time.sleep(render_lag)
                 test_env.render(save=save)
             action = self.agent.select_action(state, greedy=True)
-            self._compute_metrics(metrics, metric_objs, 'on_episode_test_step', state=state, action=action, reward=reward, info=info)
+            self._compute_metrics(metrics, metric_objs, 'on_episode_test_step', state=state, action=action, reward=reward, step=i+1, info=info)
             if is_terminal or is_truncated:
                 break
 

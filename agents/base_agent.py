@@ -8,10 +8,13 @@ class BaseAgent:
         self.num_actions = num_actions
         self.initializer = Initializer(self.num_states, self.num_actions)
         self.initializer_params = agent_info['initializer_params']
-        self.get_policy = self._get_policy_method(agent_info['action_selection_params']['method'], **agent_info['action_selection_params'].get('kwargs', {}))
+        self.behavior_policy = self._get_policy_method(agent_info['action_selection_params']['method'], **agent_info['action_selection_params'].get('kwargs', {}))
+        target_policy_params = agent_info.get('target_policy_params', agent_info['action_selection_params'])
+        self.target_policy = self._get_policy_method(target_policy_params['method'], **target_policy_params.get('kwargs', {}))
         self._step_size = self._get_step_size_fun(agent_info.get('step_size', '1/n'))
         self.discount = agent_info.get('discount', 1)
         self.allowed_actions_mask = agent_info['action_selection_params'].get('allowed_actions_mask', None)
+        self.state_action_to_after_state_map = agent_info.get('state_action_to_after_state_map', None)
 
         self.t = None
         self.num_visits = None
@@ -21,6 +24,8 @@ class BaseAgent:
 
     def reset(self):
         self.t = 0
+        self.episode_num = 1
+        self.last_state, self.last_action = None, None
         self.num_visits = self.initializer.initialize("zero")
         self.action_values = self.initializer.initialize(**self.initializer_params)
     
@@ -35,12 +40,30 @@ class BaseAgent:
     def on_episode_end(self):
         return
 
+    def update_action_value(self, state, action, target_q):
+        self.num_visits[state][action] += 1
+        self.action_values[state, action] += self._step_size(state, action) * (target_q - self.action_values[state, action])
+        if self.state_action_to_after_state_map is not None:
+            all_s, all_a = np.nonzero(self.state_action_to_after_state_map == self.state_action_to_after_state_map[state, action])
+            self.num_visits[all_s, all_a] = self.num_visits[state][action]
+            self.action_values[all_s, all_a] = self.action_values[state][action]
+
     def select_action(self, state, greedy=False):
-        policy = self.get_policy(state) if not greedy else self.get_greedy_policy(state, tie_break='random')
+        policy = self.behavior_policy(state) if not greedy else self.get_greedy_policy(state, tie_break='random')
         if isinstance(policy, np.int64):
             return policy
         else:
             return policy_action_selection(policy)
+
+    def get_action_prob(self, state, action, policy_type):
+        policy = self.target_policy(state) if policy_type == "target" else self.behavior_policy(state)
+        return policy == action if isinstance(policy, np.int64) else policy[action]
+
+    def get_value(self, state):
+        target_policy = self.target_policy(state)
+        if isinstance(target_policy, np.int64):
+            return self.action_values[state, target_policy]
+        return np.sum(target_policy*self.action_values[state])
 
     def get_greedy_policy(self, states, **greedy_policy_kwargs):
         mask = None if self.allowed_actions_mask is None else self.allowed_actions_mask[states]

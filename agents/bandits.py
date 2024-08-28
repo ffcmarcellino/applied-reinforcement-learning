@@ -24,7 +24,7 @@ class GradientBandits(BaseAgent):
     def step(self, state, reward):
         self.t += 1
         self.num_visits[self.last_state, self.last_action] += 1
-        self.action_values[self.last_state] -= self._step_size(self.last_state, self.last_action)*(reward - self.avg_reward[self.last_state])*self.get_policy(self.last_state)
+        self.action_values[self.last_state] -= self._step_size(self.last_state, self.last_action)*(reward - self.avg_reward[self.last_state])*self.target_policy(self.last_state)
         self.action_values[self.last_state, self.last_action] += self._step_size(self.last_state, self.last_action)*(reward - self.avg_reward[self.last_state])
         self.avg_reward[self.last_state] += self._inverse_count(self.last_state)*(reward - self.avg_reward[self.last_state])
         self.last_state = state

@@ -17,8 +17,6 @@ class ExpectedSarsaAgent(BaseAgent):
     
     def __init__(self, num_states, num_actions, agent_info):
         super().__init__(num_states, num_actions, agent_info)
-        target_policy_params = agent_info.get('target_policy_params', agent_info['action_selection_params'])
-        self.target_policy = self._get_policy_method(target_policy_params['method'], **target_policy_params.get('kwargs', {}))  
 
     def step(self, state, reward):
         target_policy = self.target_policy(state)

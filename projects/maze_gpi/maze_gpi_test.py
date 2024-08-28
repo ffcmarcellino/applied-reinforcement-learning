@@ -32,7 +32,7 @@ class GPIAgent:
         return
 
 env = gym.make("maze-sample-10x10-v0", enable_render=False)
-num_states = np.product(env.maze_size)
+num_states = np.prod(env.maze_size)
 num_actions = len(env.ACTION)
 initializer_params = {'init_method': 'zero'}
 terminal_states = [env.obs_to_state(env.maze_view.goal)]
